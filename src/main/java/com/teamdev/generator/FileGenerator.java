@@ -24,35 +24,11 @@ public class FileGenerator {
     private static Logger logger = Logger.getLogger(FileGenerator.class.getName());
 
     /**
-     * Generate text file
-     * @return path to the created file
-     * @deprecated
-     */
-    public String createFile() {
-        String path = "";
-
-        String tmpFilePath = ROOT + TMP_FILE_NAME + TMP_FILE_EXT;
-        Path file = Paths.get(tmpFilePath);
-
-        List<String> lines = new ArrayList<String>();
-        lines.add(generateText());
-
-
-        try {
-            Files.write(file, lines, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return path;
-    }
-
-    /**
      * Creates temp file with randomly generated text.
-     * @return Absolute path to the created file.
+     * @return Created file.
      * @throws IOException
      */
-    public String createTempFile() throws IOException {
+    public File createTempFile() throws IOException {
         File tmpFile = File.createTempFile(TMP_FILE_NAME, TMP_FILE_EXT);
 //        Files.c
         PrintWriter writer = null;
@@ -66,7 +42,7 @@ public class FileGenerator {
             }
         }
 
-        return tmpFile.getAbsolutePath();
+        return tmpFile;
     }
 
     /**
@@ -90,7 +66,6 @@ public class FileGenerator {
                 text += ' ';
             }
         }
-
 //        logger.log(Level.INFO, String.format("Random string [length: %d, lines: %d]:\n%s", length, lines, text));
         return text;
     }

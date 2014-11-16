@@ -1,23 +1,31 @@
 package com.teamdev.service.operations;
 
 
+import com.teamdev.service.Configuration;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SearchFileOperation {
-    final String ROOT_PATH = "F:/NASTYA/Java/workspace/TeamDev/TestFolder/STORAGE";
-    //TODO: context?
 
+
+    //TODO: context?
     private static Logger logger = Logger.getLogger(SearchFileOperation.class.getName());
 
-   public File searchFile (String  key) throws IOException {
+    /**
+     * search File
+     * @param origName
+     * @return
+     * @throws IOException
+     */
+    public File searchFile (String origName) throws IOException {
         String path;
         AuxiliaryOperation auxiliaryOperation = new AuxiliaryOperation();
+        path = auxiliaryOperation.nameToPathFile(origName);
 
-        path = auxiliaryOperation.nameToPathFile(key);
-        File file = new File(ROOT_PATH + path + "/" + key);
+        Configuration configuration = new Configuration();
+        File file = new File(configuration.getRotPath() + path + "/" + origName);
 
 //       logger.log(Level.INFO, "new file path: " + ROOT_PATH + depth + "/" + key);
 

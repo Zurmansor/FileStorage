@@ -1,46 +1,89 @@
 package com.teamdev.service.operations;
 
+import com.teamdev.service.Configuration;
+import com.teamdev.service.HashCalculator;
+
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class AuxiliaryOperation {
 
-    final String ROOT_PATH = "F:/NASTYA/Java/workspace/TeamDev/TestFolder/STORAGE";
-    //TODO: context?
-
     private static Logger logger = Logger.getLogger(AuxiliaryOperation.class.getName());
 
-
-    public String createPath (String charPath) throws IOException {
-        String target = ROOT_PATH;
-        String depth = "";
-
-        depth = nameToPathFile(charPath);
-/*        for (Integer i = 0; i < charPath.length() - 1; i++) {
-            depth += "/" + charPath.charAt(i);
-        }*/
+    /**
+     * Create the path by the hashName of the current file
+     *
+     * @param origName
+     * @return Created path
+     * @throws IOException
+     */
+    public String createPath(String origName) throws IOException {
+        // получение hashName из origName
+        String hashName = origNameToHashName(origName);
+        Configuration configuration = new Configuration();
+        String target = configuration.getRotPath();
+//        String depth = nameToPathFile(hashName);
+        String depth = nameToPathFile(origName);
 
 //        TODO: провеить есть ли уже такая папка
         logger.log(Level.INFO, "New path: " + target);
 
         // get Path object from string
-        Path path = FileSystems.getDefault().getPath(ROOT_PATH + depth);
+        Path path = FileSystems.getDefault().getPath(configuration.getRotPath() + depth);
+
         Files.createDirectories(path);
 
         return depth;
     }
 
-    public String nameToPathFile (String  key) throws IOException {
-        String path = "";
+    /**
+     * Separates the name into four parts
+     *
+     * @param origName
+     * @return
+     * @throws IOException
+     */
+    public String nameToPathFile(String origName) throws IOException {
+        // получение hashName из origName
+        String hashName = origNameToHashName(origName);
+        String path = "/";
+        int i;
+        Configuration configuration = new Configuration();
+        int numberParts = configuration.getNumberParts();
+        int step = Math.round(hashName.length() / numberParts);
 
-        for (Integer i = 0; i < key.length()-1; i++) {
-            path += "/" + key.charAt(i);
+        for (i = 0; i < numberParts - 1; i++) {
+            path += hashName.substring(i * step, i * step + step);
+            path += "/";
         }
+        path += hashName.substring(i * step);
+//        path += "/";
+
         return path;
     }
+
+    /**
+     * get hashName from origName
+     * @param origName
+     * @return
+     */
+    public String origNameToHashName(String origName){
+        HashCalculator hashCalculator = new HashCalculator();
+        String hashName = null;
+        try {
+            hashName = hashCalculator.getHashName(origName);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        logger.log(Level.INFO,"New file hash: "+hashName);
+
+        return hashName;
+    }
+
 
 }

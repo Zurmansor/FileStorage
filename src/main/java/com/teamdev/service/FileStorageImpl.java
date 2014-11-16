@@ -6,20 +6,45 @@ import com.teamdev.service.operations.SearchFileOperation;
 
 import java.io.*;
 import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.LinkedHashMap;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class FileStorageImpl implements FileStorage {
 
-//    final String ROOT_PATH = "F:/NASTYA/Java/workspace/TeamDev/TestFolder/STORAGE";
+    private static Logger logger = Logger.getLogger(FileStorageImpl.class.getName());
 
-//    private static Logger logger = Logger.getLogger(FileStorageImpl.class.getName());
+    private FileStorageContext fileStorageContext;
+    private LinkedHashMap fileRegister;
 
+
+    public FileStorageImpl() throws IOException {
+        fileStorageContext = new FileStorageContext();
+        fileRegister = fileStorageContext.getFileRegister();
+    }
 
     @Override
-    public void saveFile(String key, FileInputStream fileInputStream) throws Exception {
+    public void saveFile(String origName, FileInputStream fileInputStream) throws Exception {
+       // вызываю метод save
         SaveFileOperation saveFileOperation = new SaveFileOperation();
-        saveFileOperation.saveFile(key,fileInputStream);
+        File newFile = saveFileOperation.saveFile(origName,fileInputStream);
+
+        Properties properties = new Properties();
+        try {
+            properties.load(new FileInputStream("F:/NASTYA/Java/workspace/TeamDev/TestFolder/STORAGE/4f837f48/7913ac55/40cf6edb/226e0b31/tmp_file849018107267347445.txt"));
+        } catch (IOException e) {
+
+        }
+        System.out.println("sas");
+
+        //РЕГИСТРЫ
+//        Path newFilePath = FileSystems.getDefault().getPath(newFile.getAbsolutePath());
+
+//        BasicFileAttributes fileAttributes = Files.readAttributes(newFilePath, BasicFileAttributes.class);
+//        fileRegister.put(newFile.getName(), fileAttributes.creationTime().toMillis());
+//        fileStorageContext.syncToFile();
     }
 
     @Override
@@ -27,6 +52,7 @@ public class FileStorageImpl implements FileStorage {
         DeleteFileOperation deleteFileOperation = new DeleteFileOperation();
         try {
             deleteFileOperation.deleteFile(key);
+            fileRegister.remove(key);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -41,7 +67,6 @@ public class FileStorageImpl implements FileStorage {
             e.printStackTrace();
             return null;
         }
-
     }
 
     @Override
