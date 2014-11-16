@@ -1,6 +1,7 @@
 package com.teamdev.service;
 
 import com.teamdev.service.operations.DeleteFileOperation;
+import com.teamdev.service.operations.PurgeOperation;
 import com.teamdev.service.operations.SaveFileOperation;
 import com.teamdev.service.operations.SearchFileOperation;
 
@@ -30,14 +31,6 @@ public class FileStorageImpl implements FileStorage {
        // вызываю метод save
         SaveFileOperation saveFileOperation = new SaveFileOperation();
         File newFile = saveFileOperation.saveFile(origName,fileInputStream);
-
-        Properties properties = new Properties();
-        try {
-            properties.load(new FileInputStream("F:/NASTYA/Java/workspace/TeamDev/TestFolder/STORAGE/4f837f48/7913ac55/40cf6edb/226e0b31/tmp_file849018107267347445.txt"));
-        } catch (IOException e) {
-
-        }
-        System.out.println("sas");
 
         //РЕГИСТРЫ
 //        Path newFilePath = FileSystems.getDefault().getPath(newFile.getAbsolutePath());
@@ -75,7 +68,13 @@ public class FileStorageImpl implements FileStorage {
     }
 
     @Override
-    public void purge(Integer percent) {
+    public void purge(float percent) {
+        PurgeOperation purgeOperation = new PurgeOperation();
+        try {
+            purgeOperation.purge(percent);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 

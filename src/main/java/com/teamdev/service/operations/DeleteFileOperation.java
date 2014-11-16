@@ -27,9 +27,10 @@ public class DeleteFileOperation {
             logger.log(Level.INFO, "file has been deleted");
 //          logger.log(Level.INFO, "list: " + file.getParentFile().list().length);
             // удаление верхних пустых папок
+
             if (file.getParentFile().list().length == 0) {
                 Configuration configuration = new Configuration();
-                deleteEmptyDirect(file.getParentFile(), configuration.getNumberParts());
+                deleteEmptyDirectory(file.getParentFile(), configuration.getNumberParts());
             }
         } else {
             //TODO: EXCEPTION
@@ -50,10 +51,10 @@ public class DeleteFileOperation {
      * @param file
      * @param depth
      */
-    private void deleteEmptyDirect(File file, int depth){
+    private void deleteEmptyDirectory(File file, int depth){
         File fileParent = file.getParentFile();
 
-        while(depth > 0 && fileParent.list().length < 2){
+        while (depth > 0 && fileParent.list().length < 2){
             if (!file.delete()) {
                 logger.log(Level.INFO, "directory can't be deleted");
                 break;
@@ -62,6 +63,10 @@ public class DeleteFileOperation {
             file = fileParent;
             fileParent = file.getParentFile();
             depth--;
+        }
+
+        if (file.list().length == 0) {
+            file.delete();
         }
     }
 

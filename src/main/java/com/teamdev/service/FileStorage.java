@@ -15,6 +15,6 @@ public interface FileStorage {
 
     public InputStream readFile(String key);
 
-    public void purge(Integer percent);
+    public void purge(float percent);
 
 }

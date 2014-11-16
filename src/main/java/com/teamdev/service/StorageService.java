@@ -16,19 +16,25 @@ public class StorageService {
 
         //генерация файла
         FileGenerator fileGenerator = new FileGenerator();
-        File file = fileGenerator.createTempFile();
-        logger.log(Level.INFO, "Temp file: " + file.getName());
-
-
         FileStorageImpl service = new FileStorageImpl();
 
-//        service.saveFile(file.getName(), new FileInputStream(file.getAbsolutePath()));
-//        service.deleteFile("tmp_file7331723319734799093.txt");
+        int fc = 70;
+        while (fc > 0) {
+            File file = fileGenerator.createTempFile();
+            logger.log(Level.INFO, "Temp file: " + file.getName());
 
-        Configuration configuration = new Configuration();
-        File fileStorage  = new File(configuration.getRotPath());
+            service.saveFile(file.getName(), new FileInputStream(file.getAbsolutePath()));
 
-        System.out.println("size = "+fileStorage.getUsableSpace());
+            fc--;
+        }
+
+        service.purge(30);
+
+
+//        service.deleteFile("tmp_file3773039040724081430.txt");
+
+//        service.purge(10);
+
     }
 }
 

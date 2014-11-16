@@ -5,6 +5,12 @@ public class Configuration {
 
     private final String ROOT_PATH = "F:/NASTYA/Java/workspace/TeamDev/TestFolder/STORAGE";
     private int NUMBER_PARTS = 4;
+    private int MAX_USELESS = 20;
+    private long STORAGE_CAPACITY = 1024 * 15;
+
+    public long getStorageCapacity() {
+        return STORAGE_CAPACITY;
+    }
 
     public int getNumberParts() {
         return NUMBER_PARTS;
@@ -14,5 +20,7 @@ public class Configuration {
         return ROOT_PATH;
     }
 
-
+    public int getMaxUseless() {
+        return MAX_USELESS;
+    }
 }
