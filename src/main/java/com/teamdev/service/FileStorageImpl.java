@@ -1,16 +1,13 @@
 package com.teamdev.service;
 
-import com.teamdev.service.operations.DeleteFileOperation;
-import com.teamdev.service.operations.PurgeOperation;
-import com.teamdev.service.operations.SaveFileOperation;
-import com.teamdev.service.operations.SearchFileOperation;
+import com.teamdev.service.exception.*;
+import com.teamdev.service.exception.FileNotFoundException;
+import com.teamdev.service.operations.*;
+import com.teamdev.service.serialization.SerializationTools;
+import sunw.io.*;
 
 import java.io.*;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.LinkedHashMap;
-import java.util.Properties;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class FileStorageImpl implements FileStorage {
@@ -27,26 +24,40 @@ public class FileStorageImpl implements FileStorage {
     }
 
     @Override
-    public void saveFile(String origName, FileInputStream fileInputStream) throws Exception {
+    public void saveFile(String origName, FileInputStream fileInputStream) throws FileNotSavedException {
        // вызываю метод save
         SaveFileOperation saveFileOperation = new SaveFileOperation();
-        File newFile = saveFileOperation.saveFile(origName,fileInputStream);
-
-        //РЕГИСТРЫ
-//        Path newFilePath = FileSystems.getDefault().getPath(newFile.getAbsolutePath());
-
-//        BasicFileAttributes fileAttributes = Files.readAttributes(newFilePath, BasicFileAttributes.class);
-//        fileRegister.put(newFile.getName(), fileAttributes.creationTime().toMillis());
-//        fileStorageContext.syncToFile();
+        try {
+            saveFileOperation.saveFile(origName,fileInputStream);
+        } catch (StorageException e) {
+            throw new FileNotSavedException();
+        }
     }
 
     @Override
-    public void deleteFile(String key) {
+    public void saveFile(String origName, FileInputStream fileInputStream, long expTempMils) throws FileNotSavedException {
+        SaveFileOperation saveFileOperation = new SaveFileOperation();
+        File newFile = null;
+        try {
+            newFile = saveFileOperation.saveFile(origName,fileInputStream);
+        } catch (StorageException e) {
+            throw new FileNotSavedException();
+        }
+
+       if (expTempMils > 0){
+           SerializationTools serializationTools = new SerializationTools();
+           serializationTools.putToDeadList(origName, expTempMils);
+        }
+
+
+    }
+
+    @Override
+    public void deleteFile(String origName) {
         DeleteFileOperation deleteFileOperation = new DeleteFileOperation();
         try {
-            deleteFileOperation.deleteFile(key);
-            fileRegister.remove(key);
-        } catch (IOException e) {
+            deleteFileOperation.deleteFile(origName);
+        } catch (StorageException e) {
             e.printStackTrace();
         }
     }
@@ -56,7 +67,7 @@ public class FileStorageImpl implements FileStorage {
         SearchFileOperation searchFileOperation = new SearchFileOperation();
         try {
             return searchFileOperation.searchFile(key);
-        } catch (IOException e) {
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
             return null;
         }
@@ -64,6 +75,13 @@ public class FileStorageImpl implements FileStorage {
 
     @Override
     public InputStream readFile(String key) {
+        ReadOperation readOperation = new ReadOperation();
+        try {
+            readOperation.readFile(key);
+        } catch (StorageException e) {
+            e.printStackTrace();
+        }
+
         return null;
     }
 
@@ -72,7 +90,7 @@ public class FileStorageImpl implements FileStorage {
         PurgeOperation purgeOperation = new PurgeOperation();
         try {
             purgeOperation.purge(percent);
-        } catch (IOException e) {
+        } catch (StorageException e) {
             e.printStackTrace();
         }
 

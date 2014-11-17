@@ -2,9 +2,11 @@ package com.teamdev.service;
 
 
 import com.teamdev.generator.FileGenerator;
+import com.teamdev.service.exception.StorageException;
+import com.teamdev.service.operations.TempFileCleanerOperation;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,7 +20,7 @@ public class StorageService {
         FileGenerator fileGenerator = new FileGenerator();
         FileStorageImpl service = new FileStorageImpl();
 
-        int fc = 70;
+        int fc = 0;
         while (fc > 0) {
             File file = fileGenerator.createTempFile();
             logger.log(Level.INFO, "Temp file: " + file.getName());
@@ -28,12 +30,14 @@ public class StorageService {
             fc--;
         }
 
-        service.purge(30);
+//        service.deleteFile("deewf");
+        long life = 120000; //milliseconds (2 min)
 
+        File file = fileGenerator.createTempFile();
+        service.saveFile(file.getName(), new FileInputStream(file.getAbsolutePath()), life);
 
-//        service.deleteFile("tmp_file3773039040724081430.txt");
-
-//        service.purge(10);
+        TempFileCleanerOperation cleaner =  new TempFileCleanerOperation();
+        cleaner.clean();
 
     }
 }

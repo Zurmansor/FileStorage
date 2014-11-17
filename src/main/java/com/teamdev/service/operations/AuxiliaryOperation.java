@@ -2,6 +2,8 @@ package com.teamdev.service.operations;
 
 import com.teamdev.service.Configuration;
 import com.teamdev.service.HashCalculator;
+import com.teamdev.service.exception.PathIsNotCreatedException;
+import com.teamdev.service.exception.StorageException;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -20,9 +22,9 @@ public class AuxiliaryOperation {
      *
      * @param origName
      * @return Created path
-     * @throws IOException
+     * @throws StorageException
      */
-    public String createPath(String origName) throws IOException {
+    public String createPath(String origName) throws StorageException {
         // получение hashName из origName
         String hashName = origNameToHashName(origName);
         Configuration configuration = new Configuration();
@@ -36,7 +38,11 @@ public class AuxiliaryOperation {
         // get Path object from string
         Path path = FileSystems.getDefault().getPath(configuration.getRotPath() + depth);
 
-        Files.createDirectories(path);
+        try {
+            Files.createDirectories(path);
+        } catch (IOException e) {
+            throw new PathIsNotCreatedException();
+        }
 
         return depth;
     }
@@ -46,9 +52,9 @@ public class AuxiliaryOperation {
      *
      * @param origName
      * @return
-     * @throws IOException
+     * @throws
      */
-    public String nameToPathFile(String origName) throws IOException {
+    public String nameToPathFile(String origName)  {
         // получение hashName из origName
         String hashName = origNameToHashName(origName);
         String path = "/";
@@ -62,7 +68,6 @@ public class AuxiliaryOperation {
             path += "/";
         }
         path += hashName.substring(i * step);
-//        path += "/";
 
         return path;
     }

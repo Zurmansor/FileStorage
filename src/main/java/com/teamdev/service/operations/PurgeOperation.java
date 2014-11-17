@@ -2,6 +2,9 @@ package com.teamdev.service.operations;
 
 
 import com.teamdev.service.Configuration;
+import com.teamdev.service.exception.FileHasNotBeenDeletedException;
+import com.teamdev.service.exception.StorageException;
+import com.teamdev.service.exception.ToManyUselessDeleteOperationsException;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,11 +22,9 @@ public class PurgeOperation {
      *Cleans memory to the desired value
      * @param percent
      */
-    public void purge (float percent) throws IOException{
+    public void purge (float percent) throws StorageException{
         // TODO EXCEPTION
         Configuration configuration = new Configuration();
-        // записать коллекцию всех файлов
-        // осортировка
 
         collectFiles(new File(configuration.getRotPath()));
 
@@ -33,7 +34,6 @@ public class PurgeOperation {
 
         // сколько нужно свободной памяти вообще от общей.
         float requiredFreeMemory = configuration.getStorageCapacity() / 100 * percent;
-
         // сколько свободной памяти сейчас есть
         float freeMemory = configuration.getStorageCapacity() - occupiedMemory;
 
@@ -51,7 +51,11 @@ public class PurgeOperation {
             deletedSize += fileToDelete.length();
             occupiedMemory -= fileToDelete.length();
 //            TODO: проверить удалился ли файл
-            deleteFileOperation.deleteFile(fileToDelete.getName());
+            try {
+                deleteFileOperation.deleteFile(fileToDelete.getName());
+            } catch (StorageException e) {
+                throw new FileHasNotBeenDeletedException();
+            }
 
             fileList.remove(fileList.size()-1);
             fileList.trimToSize();
@@ -66,13 +70,13 @@ public class PurgeOperation {
             }
 
             if (checkMaxUseless >= configuration.getMaxUseless()) {
-//                TODO: ADD EXCEPTION
                 logger.log(Level.INFO, "To many useless delete operations");
-                break;
+                throw new ToManyUselessDeleteOperationsException();
+//                TODO: ADD EXCEPTION
+//                break;
             }
 
         }
-
         logger.log(Level.INFO, String.format("%d files [%dkb] has been deleted", deleted, deletedSize/1024));
 
     }

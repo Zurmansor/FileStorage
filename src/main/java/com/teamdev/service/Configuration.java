@@ -7,6 +7,7 @@ public class Configuration {
     private int NUMBER_PARTS = 4;
     private int MAX_USELESS = 20;
     private long STORAGE_CAPACITY = 1024 * 15;
+    private String DEAD_LIST = "DeadList.txt";
 
     public long getStorageCapacity() {
         return STORAGE_CAPACITY;
@@ -22,5 +23,9 @@ public class Configuration {
 
     public int getMaxUseless() {
         return MAX_USELESS;
+    }
+
+    public String getDeadList() {
+        return DEAD_LIST;
     }
 }
