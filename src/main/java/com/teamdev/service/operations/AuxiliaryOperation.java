@@ -25,11 +25,10 @@ public class AuxiliaryOperation {
      * @throws StorageException
      */
     public String createPath(String origName) throws StorageException {
-        // получение hashName из origName
+        // get hashName from origName
         String hashName = origNameToHashName(origName);
         Configuration configuration = new Configuration();
         String target = configuration.getRotPath();
-//        String depth = nameToPathFile(hashName);
         String depth = nameToPathFile(origName);
 
 //        TODO: провеить есть ли уже такая папка
@@ -55,14 +54,14 @@ public class AuxiliaryOperation {
      * @throws
      */
     public String nameToPathFile(String origName)  {
-        // получение hashName из origName
+        // get hashName from origName
         String hashName = origNameToHashName(origName);
         String path = "/";
         int i;
         Configuration configuration = new Configuration();
         int numberParts = configuration.getNumberParts();
         int step = Math.round(hashName.length() / numberParts);
-
+        //Separates the name
         for (i = 0; i < numberParts - 1; i++) {
             path += hashName.substring(i * step, i * step + step);
             path += "/";

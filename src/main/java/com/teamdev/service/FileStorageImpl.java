@@ -4,97 +4,66 @@ import com.teamdev.service.exception.*;
 import com.teamdev.service.exception.FileNotFoundException;
 import com.teamdev.service.operations.*;
 import com.teamdev.service.serialization.SerializationTools;
-import sunw.io.*;
-
 import java.io.*;
-import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 
 public class FileStorageImpl implements FileStorage {
 
     private static Logger logger = Logger.getLogger(FileStorageImpl.class.getName());
 
-    private FileStorageContext fileStorageContext;
-    private LinkedHashMap fileRegister;
 
-
-    public FileStorageImpl() throws IOException {
-        fileStorageContext = new FileStorageContext();
-        fileRegister = fileStorageContext.getFileRegister();
+    @Override
+    public void saveFile(String origName, FileInputStream fileInputStream) throws StorageException {
+       // call the saveFile method
+        SaveFileOperation saveFileOperation = new SaveFileOperation();
+        saveFileOperation.saveFile(origName,fileInputStream);
     }
 
     @Override
-    public void saveFile(String origName, FileInputStream fileInputStream) throws FileNotSavedException {
-       // вызываю метод save
+    public void saveFile(String origName, FileInputStream fileInputStream, long expTempMils) throws StorageException {
+//        fileInputStream.l
         SaveFileOperation saveFileOperation = new SaveFileOperation();
-        try {
-            saveFileOperation.saveFile(origName,fileInputStream);
-        } catch (StorageException e) {
-            throw new FileNotSavedException();
-        }
-    }
+//        File file = null;
+        saveFileOperation.saveFile(origName, fileInputStream);
 
-    @Override
-    public void saveFile(String origName, FileInputStream fileInputStream, long expTempMils) throws FileNotSavedException {
-        SaveFileOperation saveFileOperation = new SaveFileOperation();
-        File newFile = null;
-        try {
-            newFile = saveFileOperation.saveFile(origName,fileInputStream);
-        } catch (StorageException e) {
-            throw new FileNotSavedException();
-        }
-
+       //check if the parameter is specified expTempMils
        if (expTempMils > 0){
            SerializationTools serializationTools = new SerializationTools();
+           // call the putToDeadList method
            serializationTools.putToDeadList(origName, expTempMils);
         }
-
-
     }
 
     @Override
-    public void deleteFile(String origName) {
+    public void deleteFile(String origName) throws StorageException {
         DeleteFileOperation deleteFileOperation = new DeleteFileOperation();
-        try {
-            deleteFileOperation.deleteFile(origName);
-        } catch (StorageException e) {
-            e.printStackTrace();
-        }
+        deleteFileOperation.deleteFile(origName);
     }
 
     @Override
-    public File searchFile(String key) {
+    public File searchFile(String key) throws FileNotFoundException {
         SearchFileOperation searchFileOperation = new SearchFileOperation();
-        try {
-            return searchFileOperation.searchFile(key);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return searchFileOperation.searchFile(key);
     }
 
     @Override
-    public InputStream readFile(String key) {
+    public InputStream readFile(String key) throws StorageException {
         ReadOperation readOperation = new ReadOperation();
-        try {
-            readOperation.readFile(key);
-        } catch (StorageException e) {
-            e.printStackTrace();
-        }
+        readOperation.readFile(key);
 
         return null;
     }
 
     @Override
-    public void purge(float percent) {
+    public void purge(float percent) throws StorageException {
         PurgeOperation purgeOperation = new PurgeOperation();
-        try {
-            purgeOperation.purge(percent);
-        } catch (StorageException e) {
-            e.printStackTrace();
-        }
+        purgeOperation.purge(percent);
 
     }
 
-
+    @Override
+    public float freeStorageSpace() {
+        FreeStorageSpaceOperation freeStorageSpaceOperation = new FreeStorageSpaceOperation();
+        return freeStorageSpaceOperation.freeStorageSpace();
+    }
 }

@@ -8,7 +8,6 @@ import com.teamdev.service.serialization.SerializationTools;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -20,6 +19,9 @@ public class TempFileCleanerOperation {
 
     private static Logger logger = Logger.getLogger(TempFileCleanerOperation.class.getName());
 
+    /**
+     * clean old temp files
+     */
     public void clean (){
         SerializationTools serializationTools = new SerializationTools();
         HashMap<String, Long> deadList = serializationTools.getDeadList();
@@ -37,14 +39,12 @@ public class TempFileCleanerOperation {
                     DeleteFileOperation deleteFileOperation = new DeleteFileOperation();
                     try {
                         deleteFileOperation.deleteFile(origName);
-                        System.out.println(origName + " -- " + deadList.get(origName));
                     } catch (StorageException e) {
 //                        e.printStackTrace();
                     }
                     tempDeadList.put(origName, deadList.get(origName));
                 }
             } catch (FileNotFoundException e) {
-                //TODO: файла нет --> удалить из списка
                 tempDeadList.put(origName, deadList.get(origName));
 //                e.printStackTrace();
             }

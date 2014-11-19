@@ -2,12 +2,10 @@ package com.teamdev.service.operations;
 
 
 import com.teamdev.service.Configuration;
-import com.teamdev.service.exception.FileHasNotBeenDeletedException;
 import com.teamdev.service.exception.StorageException;
 import com.teamdev.service.exception.ToManyUselessDeleteOperationsException;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,11 +17,10 @@ public class PurgeOperation {
     private long occupiedMemory = 0;
 
     /**
-     *Cleans memory to the desired value
+     * Cleans memory to the desired value
      * @param percent
      */
     public void purge (float percent) throws StorageException{
-        // TODO EXCEPTION
         Configuration configuration = new Configuration();
 
         collectFiles(new File(configuration.getRotPath()));
@@ -32,29 +29,30 @@ public class PurgeOperation {
 
         File fileStorage  = new File(configuration.getRotPath());
 
-        // сколько нужно свободной памяти вообще от общей.
+        // how much free memory you need
         float requiredFreeMemory = configuration.getStorageCapacity() / 100 * percent;
-        // сколько свободной памяти сейчас есть
-        float freeMemory = configuration.getStorageCapacity() - occupiedMemory;
+        // how much free memory there is now
+        FreeStorageSpaceOperation freeStorageSpaceOperation = new FreeStorageSpaceOperation();
+
+        float freeMemory = freeStorageSpaceOperation.freeStorageSpace();
 
         int checkMaxUseless = 0;
         int deleted = 0;
         long deletedSize = 0;
 
-        // очищаем самые старые файлы, пока не освободим нужное место в памяти
+        // clean the oldest files until you clear the necessary space in memory
         while (freeMemory < requiredFreeMemory && !fileList.isEmpty()) {
             DeleteFileOperation deleteFileOperation = new DeleteFileOperation();
             File fileToDelete = fileList.get(fileList.size() - 1);
 
-            // сначала смотрим размер файла, потом удаляем
+            // first look at the size of the file , then remove
             deleted++;
             deletedSize += fileToDelete.length();
             occupiedMemory -= fileToDelete.length();
-//            TODO: проверить удалился ли файл
             try {
                 deleteFileOperation.deleteFile(fileToDelete.getName());
             } catch (StorageException e) {
-                throw new FileHasNotBeenDeletedException();
+//                throw new FileHasNotBeenDeletedException();
             }
 
             fileList.remove(fileList.size()-1);
@@ -68,17 +66,13 @@ public class PurgeOperation {
             } else {
                 checkMaxUseless = 0;
             }
-
+            // chek if to many useless delete operations
             if (checkMaxUseless >= configuration.getMaxUseless()) {
                 logger.log(Level.INFO, "To many useless delete operations");
                 throw new ToManyUselessDeleteOperationsException();
-//                TODO: ADD EXCEPTION
-//                break;
             }
-
         }
         logger.log(Level.INFO, String.format("%d files [%dkb] has been deleted", deleted, deletedSize/1024));
-
     }
 
     /**

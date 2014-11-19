@@ -7,6 +7,12 @@ import com.teamdev.service.exception.StorageException;
 import java.io.*;
 
 public class ReadOperation{
+    /**
+     * readFile
+     * @param origName
+     * @return inputStream
+     * @throws StorageException
+     */
     public InputStream readFile(String origName) throws StorageException {
 
         SearchFileOperation searchFileOperation = new SearchFileOperation();

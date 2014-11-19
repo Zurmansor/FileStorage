@@ -17,7 +17,7 @@ public class SearchFileOperation {
      * search File
      * @param origName
      * @return
-     * @throws IOException
+     * @throws FileNotFoundException
      */
     public File searchFile (String origName) throws FileNotFoundException {
         String path;

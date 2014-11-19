@@ -15,33 +15,37 @@ public class DeleteFileOperation {
 
     private static Logger logger = Logger.getLogger(DeleteFileOperation.class.getName());
 
+    /**
+     * Deletes the file
+     * @param origName
+     * @throws StorageException
+     */
     public void deleteFile (String  origName) throws StorageException{
 
         SearchFileOperation searchFileOperation = new SearchFileOperation();
         File file = null;
 
         try {
+        //search file
         file = searchFileOperation.searchFile(origName);
+        // if file is not found throw exception
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
 
-        logger.log(Level.INFO, "наш путь ------------- " + file.getAbsolutePath());
-
+        logger.log(Level.INFO, "our path ------------- " + file.getAbsolutePath());
+        // if file is not exists throw exception
         if (!file.exists()) {
             throw new FileNotFoundException();
-            //TODO: EXCEPTION
-//            logger.log(Level.INFO, "file is not exist");
-//            return;
         }
-
+        //If a file is deleted delete empty folders top
         if (file.delete()){
             logger.log(Level.INFO, "file has been deleted");
-//          logger.log(Level.INFO, "list: " + file.getParentFile().list().length);
 
-            // удаление верхних пустых папок
+            // delete empty folders top
             if (file.getParentFile().list().length == 0) {
                 Configuration configuration = new Configuration();
+                // if can not removes directory throw exception
                 try {
                     deleteEmptyDirectory(file.getParentFile(), configuration.getNumberParts());
                 } catch (DirectoryNotDeletedException e) {
@@ -49,7 +53,7 @@ public class DeleteFileOperation {
                 }
             }
         } else {
-            //TODO: EXCEPTION
+            //otherwise throw exception
             logger.log(Level.INFO, "file has not been deleted");
             throw new FileHasNotBeenDeletedException();
         }
@@ -66,8 +70,6 @@ public class DeleteFileOperation {
         while (depth > 0 && fileParent.list().length < 2){
             if (!file.delete()) {
                 throw new DirectoryNotDeletedException();
-//                logger.log(Level.INFO, "directory can't be deleted");
-//                break;
             }
             file = fileParent;
             fileParent = file.getParentFile();

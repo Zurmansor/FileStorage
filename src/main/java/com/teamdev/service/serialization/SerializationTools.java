@@ -5,7 +5,6 @@ import com.teamdev.service.Configuration;
 
 import java.io.*;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,6 +15,11 @@ public class SerializationTools {
         return deserializeDeadList();
     }
 
+    /**
+     * entering a new item to the DeadList
+     * @param origName
+     * @param expTempMils
+     */
     public void putToDeadList(String origName, long expTempMils){
 
         HashMap<String, Long> deadList = deserializeDeadList();
@@ -24,6 +28,10 @@ public class SerializationTools {
         serializeDeadList(deadList);
     }
 
+    /**
+     * serialize DeadList
+     * @param deadList
+     */
     private void serializeDeadList(HashMap<String, Long> deadList){
         Configuration configuration = new Configuration();
         try
@@ -41,9 +49,13 @@ public class SerializationTools {
         }
     }
 
+    /**
+     *deserialize DeadList
+     * @return deadList in format HashMap
+     */
     private HashMap<String,Long> deserializeDeadList() {
         Configuration configuration = new Configuration();
-        HashMap<String, Long> deadList = null;
+        HashMap<String, Long> deadList = new HashMap<String, Long>();
         try {
             FileInputStream fis = new FileInputStream(configuration.getRotPath() + "/" + configuration.getDeadList());
             ObjectInputStream ois = new ObjectInputStream(fis);
@@ -63,18 +75,19 @@ public class SerializationTools {
         return deadList;
     }
 
+    /**
+     * Update dead List
+     * @param tempDeadList
+     */
     public void deadListUpdate(HashMap<String, Long> tempDeadList){
         HashMap<String, Long> deadList = getDeadList();
-        HashMap<String, Long> newDeadList = new HashMap<String, Long>();
 
-        for (String origName : deadList.keySet()) {
-            // если временный файл не был удален, помешаем его в новый список
-            if (!tempDeadList.containsKey(origName)){
-                newDeadList.put(origName, deadList.get(origName));
+        for (String origName : tempDeadList.keySet()) {
+            if (deadList.containsKey(origName)){
+                deadList.remove(origName);
             }
         }
 
-//        сохраняем новый список
-        serializeDeadList(newDeadList);
+        serializeDeadList(deadList);
     }
 }

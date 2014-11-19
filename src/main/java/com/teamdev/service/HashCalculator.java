@@ -42,7 +42,7 @@ public class HashCalculator {
     }
 
     public  String getHashName (String name) throws NoSuchAlgorithmException {
-        logger.log(Level.INFO, "IN: " + name);
+//        logger.log(Level.INFO, "IN: " + name);
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(name.getBytes());
 
@@ -53,7 +53,7 @@ public class HashCalculator {
             sb.append(String.format("%02x", b & 0xff));
         }
 
-        logger.log(Level.INFO, "OUT: " + sb.toString());
+//        logger.log(Level.INFO, "OUT: " + sb.toString());
 
         return sb.toString();
     }

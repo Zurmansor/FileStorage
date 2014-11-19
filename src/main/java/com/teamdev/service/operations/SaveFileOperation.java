@@ -2,18 +2,12 @@ package com.teamdev.service.operations;
 
 
 import com.teamdev.service.Configuration;
-import com.teamdev.service.exception.FileNotSavedException;
-import com.teamdev.service.exception.FileWithTheSameNameAlreadyExistsException;
-import com.teamdev.service.exception.StorageException;
+import com.teamdev.service.exception.*;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributeView;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,33 +23,45 @@ public class SaveFileOperation {
      * @throws StorageException
      */
     public File saveFile(String origName, FileInputStream inputStream) throws StorageException {
+
         SearchFileOperation searchFileOperation = new SearchFileOperation();
 
-        // проверка есть ли файл с таким названием в системе
+        if (!checkValidName(origName)){
+            throw  new IncorrectlyFileNameException();
+        }
+        // check whether there is a file with the same name in the system
         if (searchFileOperation.searchFile(origName).exists()){
-            // бросаем исключение - Файл с таким именем уже существует
+            // if file exists throws Exception - A file with this name already exists
             throw new FileWithTheSameNameAlreadyExistsException();
-            //TODO: описать в JDoc EXCEPTION
         }
 
-        //создаем путь для файла (строим папки)
+        //create a path for the file ( build folders)
         AuxiliaryOperation auxiliaryOperation = new AuxiliaryOperation();
         String depth = auxiliaryOperation.createPath(origName);
 
-        // создаем окончательный адресс файла
+        // create the ultimate address file
         Configuration configuration = new Configuration();
         String newFilePath = configuration.getRotPath() + depth + "/" + origName;
         File file = new File(newFilePath);
 
-        // если путь свободен - мы записываемся
+        FreeStorageSpaceOperation freeStorageSpaceOperation = new FreeStorageSpaceOperation();
+        float freeSpace = freeStorageSpaceOperation.freeStorageSpace();
+
+        // if the way is clear - we save
         try {
             if (file.createNewFile()) {
                 // read from temp file
                 int data = inputStream.read();
+                int size = 0;
                 String content = "";
                 while(data != -1) {
                     content += (char) data;
+                    size = content.getBytes().length;
                     data = inputStream.read();
+
+                    if (size > freeSpace) {
+                        throw new NoFreeSpaceException();
+                    }
                 }
                 inputStream.close();
 
@@ -65,16 +71,21 @@ public class SaveFileOperation {
                 logger.log(Level.INFO, "new file path: " + newFilePath);
                 outputStream.close();
             } else {
+                // if file not saved throws Exception
                 throw new FileNotSavedException();
-                // исключение File Exist либо по другой причине не удалось создать
-                //TODO: EXCEPTION
-                //        TODO: если создать файл не удалось, возвращать null
             }
         } catch (IOException e) {
             throw new FileNotSavedException();
         }
-//        FileRegister fileRegisterItem = new FileRegister();
-//        fileRegisterItem.setHashName();
         return new File(newFilePath);
     }
+
+    private boolean checkValidName(String origName){
+
+            String pattern = "[a-zA-z0-9.\\-_! ]+";
+            return origName.matches(pattern);
+
+    }
+
+
 }
