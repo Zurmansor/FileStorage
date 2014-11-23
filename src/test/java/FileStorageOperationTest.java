@@ -1,14 +1,14 @@
-import com.teamdev.generator.FileGenerator;
-import com.teamdev.service.FileStorageImpl;
-import com.teamdev.service.exception.StorageException;
+import generator.FileGenerator;
+import com.teamdev.filestorage.service.FileStorageImpl;
+import com.teamdev.filestorage.service.exception.StorageException;
 
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.teamdev.service.operations.DeleteFileOperation;
-import com.teamdev.service.operations.ReadOperation;
-import com.teamdev.service.operations.SearchFileOperation;
+import com.teamdev.filestorage.service.operations.DeleteFileOperation;
+import com.teamdev.filestorage.service.operations.ReadOperation;
+import com.teamdev.filestorage.service.routine.SearchFileOperation;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
