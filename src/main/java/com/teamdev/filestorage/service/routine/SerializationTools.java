@@ -1,4 +1,4 @@
-package com.teamdev.filestorage.service.serialization;
+package com.teamdev.filestorage.service.routine;
 
 
 import com.teamdev.filestorage.service.Configuration;
@@ -9,7 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SerializationTools {
-    private static Logger logger = Logger.getLogger(SerializationTools.class.getName());
+    private static Logger LOG = Logger.getLogger(SerializationTools.class.getName());
 
     public HashMap<String, Long> getDeadList() {
         return deserializeDeadList();
@@ -17,14 +17,16 @@ public class SerializationTools {
 
     /**
      * entering a new item to the DeadList
-     * @param origName
-     * @param expTempMils
+     * @param key
+     * @param expirationTempMillis
      */
-    public void putToDeadList(String origName, long expTempMils){
+    public void putToDeadList(String key, long expirationTempMillis){
 
         HashMap<String, Long> deadList = deserializeDeadList();
-        deadList.put(origName, expTempMils);
-        logger.log(Level.INFO, "DeadList size: " + deadList.size());
+        deadList.put(key, expirationTempMillis);
+        if (LOG.isLoggable(Level.INFO)) {
+            LOG.log(Level.INFO, "DeadList size: " + deadList.size());
+        }
         serializeDeadList(deadList);
     }
 
@@ -37,12 +39,14 @@ public class SerializationTools {
         try
         {
             FileOutputStream fos =
-                    new FileOutputStream(configuration.getRotPath() + "/" + configuration.getDeadList());
+                    new FileOutputStream(configuration.getRootPath() + "/" + configuration.getDeadList());
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(deadList);
             oos.close();
             fos.close();
-            logger.log(Level.INFO, "DeadList has been serialized");
+            if (LOG.isLoggable(Level.INFO)) {
+                LOG.log(Level.INFO, "DeadList has been serialized");
+            }
         }catch(IOException ioe)
         {
             ioe.printStackTrace();
@@ -57,7 +61,7 @@ public class SerializationTools {
         Configuration configuration = new Configuration();
         HashMap<String, Long> deadList = new HashMap<String, Long>();
         try {
-            FileInputStream fis = new FileInputStream(configuration.getRotPath() + "/" + configuration.getDeadList());
+            FileInputStream fis = new FileInputStream(configuration.getRootPath() + "/" + configuration.getDeadList());
             ObjectInputStream ois = new ObjectInputStream(fis);
             deadList = (HashMap) ois.readObject();
             ois.close();
@@ -69,8 +73,9 @@ public class SerializationTools {
 //            e.printStackTrace();
             return deadList;
         }
-
-        logger.log(Level.INFO, "DeadList has been deserialized");
+        if (LOG.isLoggable(Level.INFO)) {
+            LOG.log(Level.INFO, "DeadList has been deserialized");
+        }
 
         return deadList;
     }
@@ -82,9 +87,9 @@ public class SerializationTools {
     public void deadListUpdate(HashMap<String, Long> tempDeadList){
         HashMap<String, Long> deadList = getDeadList();
 
-        for (String origName : tempDeadList.keySet()) {
-            if (deadList.containsKey(origName)){
-                deadList.remove(origName);
+        for (String key : tempDeadList.keySet()) {
+            if (deadList.containsKey(key)){
+                deadList.remove(key);
             }
         }
 

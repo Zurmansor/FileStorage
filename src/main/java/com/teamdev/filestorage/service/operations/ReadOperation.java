@@ -1,7 +1,6 @@
 package com.teamdev.filestorage.service.operations;
 
 
-import com.teamdev.filestorage.service.exception.StorageException;
 import com.teamdev.filestorage.service.exception.FileNotFoundException;
 import com.teamdev.filestorage.service.routine.SearchFileOperation;
 
@@ -9,17 +8,18 @@ import java.io.*;
 
 public class ReadOperation{
     /**
-     * readFile
-     * @param origName
+     * Read File. Search for the file on a key, if such a file exists, returns it to the stream.
+     * @param key
      * @return inputStream
-     * @throws com.teamdev.filestorage.service.exception.StorageException
+     * @throws FileNotFoundException
      */
-    public InputStream readFile(String origName) throws StorageException {
+    public InputStream readFile(String key) throws FileNotFoundException {
 
         SearchFileOperation searchFileOperation = new SearchFileOperation();
         File file;
 
-        file = searchFileOperation.searchFile(origName);
+        file = searchFileOperation.searchFile(key);
+
         InputStream inputStream = null;
 
         try {
@@ -27,6 +27,7 @@ public class ReadOperation{
         } catch (java.io.FileNotFoundException e) {
             throw new FileNotFoundException();
         }
+
         return inputStream;
     }
 }

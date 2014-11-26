@@ -6,19 +6,19 @@ import java.io.File;
 
 public class FreeStorageSpaceOperation {
 
-    private float occupiedMemory = 0;
+    private long occupiedMemory = 0;
 
     /**
-     * info how much free space in the storage
-     * @return in bytes
+     * Info how much free space in the storage
+     * @return freeMemory in bytes
      */
-    public float freeStorageSpace() {
+    public long freeStorageSpace() {
         Configuration configuration = new Configuration();
-        File fileStorage = new File(configuration.getRotPath());
+        File fileStorage = new File(configuration.getRootPath());
 
         weighFiles(fileStorage);
 
-        float freeMemory = configuration.getStorageCapacity() - occupiedMemory;
+        long freeMemory = configuration.getStorageCapacity() - occupiedMemory;
         return freeMemory;
     }
 
@@ -28,7 +28,9 @@ public class FreeStorageSpaceOperation {
      */
     private void weighFiles(File dir) {
         File[] files = dir.listFiles();
-
+        if (files == null){
+            return;
+        }
         for (File file : files) {
             if (file.isFile()) {
                 occupiedMemory += file.length();

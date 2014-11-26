@@ -1,0 +1,5 @@
+generator\FileGenerator.class
+SaveFileOperationTest.class
+DeleteFileOperationTest.class
+ReadFileOperationTest.class
+TempFileCleanerTest.class

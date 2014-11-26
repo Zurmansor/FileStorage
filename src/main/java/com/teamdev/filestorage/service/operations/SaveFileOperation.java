@@ -18,40 +18,44 @@ public class SaveFileOperation {
     private static Logger LOG = Logger.getLogger(SaveFileOperation.class.getName());
 
     /**
-     * saves the file
-     * @param origName
+     * Save the file in the file storage.
+     * Checks whether there is such a file already in the store, if there is issues exception.
+     * Save the file on a specially generated path of hashCode file.
+     * The file itself is written with the key that was given by the user,
+     * however, illegal characters are replaced with "_".
+     * @param key
      * @param inputStream
      * @return
-     * @throws
+     * @throws FileWithTheSameNameAlreadyExistsException, NoFreeSpaceException
      */
-    public File saveFile(String origName, FileInputStream inputStream) throws
+    public File saveFile(String key, FileInputStream inputStream) throws
             FileWithTheSameNameAlreadyExistsException, NoFreeSpaceException {
 
         SearchFileOperation searchFileOperation = new SearchFileOperation();
 
 //        TODO: ЗАМЕНА при сохранении
-//        if (!checkValidName(origName)){
+//        if (!checkValidName(key)){
 //            throw  new IncorrectlyFileNameException();
 //        }
         // check whether there is a file with the same name in the system
 
-        if (searchFileOperation.searchFile(origName) != null) {
+        if (searchFileOperation.searchFile(key) != null) {
             throw new FileWithTheSameNameAlreadyExistsException();
         }
-
 
         //create a path for the file ( build folders)
         AuxiliaryOperation auxiliaryOperation = new AuxiliaryOperation();
         String depth;
         try {
-            depth = auxiliaryOperation.createPath(origName);
+            depth = auxiliaryOperation.createPath(key);
         } catch (RuntimeException e) {
             throw new RuntimeException();
         }
 
         // create the ultimate address file
         Configuration configuration = new Configuration();
-        String newFilePath = configuration.getRotPath() + depth + origName;
+        final String fixedKey = fixKey(key);
+        String newFilePath = configuration.getRootPath() + depth + fixedKey;
         File file = new File(newFilePath);
 
         FreeStorageSpaceOperation freeStorageSpaceOperation = new FreeStorageSpaceOperation();
@@ -74,7 +78,7 @@ public class SaveFileOperation {
                             inputStream.close();
                             DeleteFileOperation deleteFileOperation = new DeleteFileOperation();
                             deleteFileOperation.deleteFile(file.getName());
-                            throw new NoFreeSpaceException(depth + origName);
+                            throw new NoFreeSpaceException(depth + fixedKey);
                         }
 
                     }
@@ -87,7 +91,7 @@ public class SaveFileOperation {
                 outputStream.close();
 
                 if (LOG.isLoggable(Level.INFO)) {
-                    LOG.log(Level.INFO, "File has been saved: " + depth + origName);
+                    LOG.log(Level.INFO, "File has been saved: " + depth + fixedKey);
                 }
             } else {
                 // if file not saved throws Exception
@@ -99,16 +103,18 @@ public class SaveFileOperation {
         return new File(newFilePath);
     }
 
-    /*
-    private boolean checkValidName(String origName){
-
-            String pattern = "[a-zA-z0-9.\\-_! ]+";
-            return origName.matches(pattern);
-
+    /**
+     * Replacing a key unsuitable characters.
+     * @param key
+     * @return
+     */
+    private String fixKey(String key) {
+        final String fixedName = key.replaceAll("[^a-z^A-Z^0-9.\\-_!]", "_");
+    return fixedName;
     }
-    */
 
     /**
+     * Callback pattern
      * true if operation should be continue
      * false if not
      */

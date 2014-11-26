@@ -1,9 +1,9 @@
-package com.teamdev.filestorage.service.operations;
+package com.teamdev.filestorage.service.cleaner;
 
 
+import com.teamdev.filestorage.service.operations.DeleteFileOperation;
 import com.teamdev.filestorage.service.routine.SearchFileOperation;
-import com.teamdev.filestorage.service.serialization.SerializationTools;
-import com.teamdev.filestorage.service.exception.StorageException;
+import com.teamdev.filestorage.service.routine.SerializationTools;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,35 +17,36 @@ import java.util.logging.Logger;
 
 public class TempFileCleanerOperation {
 
-    private static Logger LOGGER = Logger.getLogger(TempFileCleanerOperation.class.getName());
+    private static Logger LOG = Logger.getLogger(TempFileCleanerOperation.class.getName());
 
     /**
-     * clean old temp files
+     * Clean old temp files
      */
     public void clean (){
         SerializationTools serializationTools = new SerializationTools();
         HashMap<String, Long> deadList = serializationTools.getDeadList();
         HashMap<String, Long> tempDeadList = new HashMap<String, Long>();
-
-        LOGGER.log(Level.INFO, deadList.size() + " temp file has been found");
-
-        for(String origName : deadList.keySet()) {
+        if (LOG.isLoggable(Level.INFO)) {
+            LOG.log(Level.INFO, deadList.size() + " temp file has been found");
+        }
+        for(String key : deadList.keySet()) {
             SearchFileOperation searchFileOperation = new SearchFileOperation();
-                File file = searchFileOperation.searchFile(origName);
+                File file = searchFileOperation.searchFile(key);
                 if (file == null) {
-                    tempDeadList.put(origName, deadList.get(origName));
+                    tempDeadList.put(key, deadList.get(key));
                     continue;
                 }
 
                 long createdTime = getCreatedTime(file.getAbsolutePath());
-                if (System.currentTimeMillis() >= createdTime + deadList.get(origName)) {
+                if (System.currentTimeMillis() >= createdTime + deadList.get(key)) {
                     DeleteFileOperation deleteFileOperation = new DeleteFileOperation();
-                    deleteFileOperation.deleteFile(origName);
-                    tempDeadList.put(origName, deadList.get(origName));
+                    deleteFileOperation.deleteFile(key);
+                    tempDeadList.put(key, deadList.get(key));
                 }
         }
-
-        LOGGER.log(Level.INFO, tempDeadList.size() + " temp file has been deleted");
+        if (LOG.isLoggable(Level.INFO)) {
+            LOG.log(Level.INFO, tempDeadList.size() + " temp file has been deleted");
+        }
         serializationTools.deadListUpdate(tempDeadList);
 
     }

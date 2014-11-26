@@ -2,73 +2,44 @@ package com.teamdev.filestorage.service.operations;
 
 
 import com.teamdev.filestorage.service.Configuration;
-import com.teamdev.filestorage.service.exception.StorageException;
-import com.teamdev.filestorage.service.exception.ToManyUselessDeleteOperationsException;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class PurgeOperation {
-    private static Logger logger = Logger.getLogger(PurgeOperation.class.getName());
 
     private ArrayList<File> fileList= new ArrayList<File>();
-    private long occupiedMemory = 0;
 
     /**
-     * Cleans memory to the desired value
-     * @param percent
+     * Clears the specified amount of memory.
+     * Collects all the files in the repository collection ( name and date lastModified).
+     * Deletes the old files until the desired amount of memory available
+     * @param needToClearSpace in bytes
      */
-    public void purge (float percent) throws StorageException {
+    public void purge (long needToClearSpace){
         Configuration configuration = new Configuration();
 
-        collectFiles(new File(configuration.getRotPath()));
+        collectFiles(new File(configuration.getRootPath()));
 
         sortFileList();
-
-        File fileStorage  = new File(configuration.getRotPath());
-
-        // how much free memory you need
-        float requiredFreeMemory = configuration.getStorageCapacity() / 100 * percent;
-        // how much free memory there is now
-        FreeStorageSpaceOperation freeStorageSpaceOperation = new FreeStorageSpaceOperation();
-
-        float freeMemory = freeStorageSpaceOperation.freeStorageSpace();
-
-        int checkMaxUseless = 0;
-        int deleted = 0;
-        long deletedSize = 0;
+        long freedMemory = 0;
 
         // clean the oldest files until you clear the necessary space in memory
-        while (freeMemory < requiredFreeMemory && !fileList.isEmpty()) {
+        while (freedMemory < needToClearSpace && !fileList.isEmpty()) {
             DeleteFileOperation deleteFileOperation = new DeleteFileOperation();
             File fileToDelete = fileList.get(fileList.size() - 1);
 
-            // first look at the size of the file , then remove
-            deleted++;
-            deletedSize += fileToDelete.length();
-            occupiedMemory -= fileToDelete.length();
-            deleteFileOperation.deleteFile(fileToDelete.getName());
+            try{
+                long tempFileLength = fileToDelete.length();
+                deleteFileOperation.deleteFile(fileToDelete.getName());
+                freedMemory += tempFileLength;
+            } catch (RuntimeException e){
 
-            fileList.remove(fileList.size()-1);
-            fileList.trimToSize();
-
-            float prevFreeMemory = freeMemory;
-            freeMemory = configuration.getStorageCapacity() - occupiedMemory;
-
-            if (prevFreeMemory == freeMemory) {
-                checkMaxUseless++;
-            } else {
-                checkMaxUseless = 0;
-            }
-            // chek if to many useless delete operations
-            if (checkMaxUseless >= configuration.getMaxUseless()) {
-                logger.log(Level.INFO, "To many useless delete operations");
-                throw new ToManyUselessDeleteOperationsException();
+            } finally {
+                fileList.remove(fileList.size()-1);
+                fileList.trimToSize();
             }
         }
-        logger.log(Level.INFO, String.format("%d files [%dkb] has been deleted", deleted, deletedSize/1024));
     }
 
     /**
@@ -80,7 +51,7 @@ public class PurgeOperation {
 
         for (File file : files) {
             if (file.isFile()) {
-                occupiedMemory += file.length();
+//                occupiedMemory += file.length();
                 fileList.add(file);
             } else {
                 collectFiles(file);
@@ -102,6 +73,4 @@ public class PurgeOperation {
             }
         }
     }
-
-
 }
