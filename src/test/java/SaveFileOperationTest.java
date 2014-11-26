@@ -1,3 +1,4 @@
+import com.teamdev.filestorage.service.Configuration;
 import com.teamdev.filestorage.service.exception.FileWithTheSameNameAlreadyExistsException;
 import com.teamdev.filestorage.service.exception.NoFreeSpaceException;
 import com.teamdev.filestorage.service.routine.SerializationTools;
@@ -67,6 +68,7 @@ public class SaveFileOperationTest {
         File file = null;
         try {
             file = fileGenerator.createTempFile();
+            tempFiles.add(file);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -96,8 +98,11 @@ public class SaveFileOperationTest {
     public void testSaveTempFile() throws FileNotFoundException {
         File file = null;
         long life = (int) (Math.random() * 120000 + 2000); //milliseconds
+
+
         try {
             file = fileGenerator.createTempFile();
+            tempFiles.add(file);
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
@@ -113,7 +118,12 @@ public class SaveFileOperationTest {
 
         SerializationTools serializationTools = new SerializationTools();
         HashMap<String, Long> deadList;
-        deadList = serializationTools.getDeadList();
+        deadList = serializationTools.getExpirationTimeList();
+
+        Configuration configuration = new Configuration();
+        File df = new File (configuration.getRootPath() + "/" + configuration.getExpirationTimeList());
+        df.delete();
+
         assertTrue(deadList.containsKey(file.getName()) && deadList.get(file.getName()) == life);
 
     }

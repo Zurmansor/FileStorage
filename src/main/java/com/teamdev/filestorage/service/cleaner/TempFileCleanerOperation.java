@@ -24,30 +24,30 @@ public class TempFileCleanerOperation {
      */
     public void clean (){
         SerializationTools serializationTools = new SerializationTools();
-        HashMap<String, Long> deadList = serializationTools.getDeadList();
-        HashMap<String, Long> tempDeadList = new HashMap<String, Long>();
+        HashMap<String, Long> expirationTimeList = serializationTools.getExpirationTimeList();
+        HashMap<String, Long> tempExpirationTimeList = new HashMap<String, Long>();
         if (LOG.isLoggable(Level.INFO)) {
-            LOG.log(Level.INFO, deadList.size() + " temp file has been found");
+            LOG.log(Level.INFO, expirationTimeList.size() + " temp file has been found");
         }
-        for(String key : deadList.keySet()) {
+        for(String key : expirationTimeList.keySet()) {
             SearchFileOperation searchFileOperation = new SearchFileOperation();
                 File file = searchFileOperation.searchFile(key);
                 if (file == null) {
-                    tempDeadList.put(key, deadList.get(key));
+                    tempExpirationTimeList.put(key, expirationTimeList.get(key));
                     continue;
                 }
 
                 long createdTime = getCreatedTime(file.getAbsolutePath());
-                if (System.currentTimeMillis() >= createdTime + deadList.get(key)) {
+                if (System.currentTimeMillis() >= createdTime + expirationTimeList.get(key)) {
                     DeleteFileOperation deleteFileOperation = new DeleteFileOperation();
                     deleteFileOperation.deleteFile(key);
-                    tempDeadList.put(key, deadList.get(key));
+                    tempExpirationTimeList.put(key, expirationTimeList.get(key));
                 }
         }
         if (LOG.isLoggable(Level.INFO)) {
-            LOG.log(Level.INFO, tempDeadList.size() + " temp file has been deleted");
+            LOG.log(Level.INFO, tempExpirationTimeList.size() + " temp file has been deleted");
         }
-        serializationTools.deadListUpdate(tempDeadList);
+        serializationTools.expirationTimeListUpdate(tempExpirationTimeList);
 
     }
 

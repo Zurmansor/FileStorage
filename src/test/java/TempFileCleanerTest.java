@@ -1,3 +1,4 @@
+import com.teamdev.filestorage.service.Configuration;
 import com.teamdev.filestorage.service.FileStorageImpl;
 import com.teamdev.filestorage.service.cleaner.TempFileCleanerOperation;
 import com.teamdev.filestorage.service.cleaner.ToggleFileCleanerImpl;
@@ -44,6 +45,10 @@ public class TempFileCleanerTest {
         while (!tempFiles.isEmpty()) {
             tempFiles.pop().delete();
         }
+
+        Configuration configuration = new Configuration();
+        File df = new File (configuration.getRootPath() + "/" + configuration.getExpirationTimeList());
+        df.delete();
     }
 
     @Test
@@ -57,7 +62,6 @@ public class TempFileCleanerTest {
             System.out.println(e.getMessage());
         }
 
-        System.out.println(file.getAbsolutePath());
         try {
             service.saveFile(file.getName(), new FileInputStream(file.getAbsolutePath()), life);
             createdFiles.add(file.getName());
@@ -75,7 +79,7 @@ public class TempFileCleanerTest {
         assertTrue(fileTemp != null && fileTemp.exists());
     }
 
-    @Test
+ /*   @Test
     @Ignore
     public void testFileCleanerAfter() throws FileNotFoundException {
         File file = null;
@@ -114,6 +118,6 @@ public class TempFileCleanerTest {
             }
         };
         timer.schedule(timerTask, 3000);
-    }
+    }*/
 
 }

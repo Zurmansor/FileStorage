@@ -24,7 +24,7 @@ public class FileStorageImpl implements FileStorage {
         //check if the parameter is specified expirationTempMillis
         if (expirationTempMillis > 0){
             SerializationTools serializationTools = new SerializationTools();
-            serializationTools.putToDeadList(key, expirationTempMillis);
+            serializationTools.putToExpirationTimeList(key, expirationTempMillis);
         }
     }
 

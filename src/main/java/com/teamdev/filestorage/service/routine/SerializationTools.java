@@ -11,41 +11,41 @@ import java.util.logging.Logger;
 public class SerializationTools {
     private static Logger LOG = Logger.getLogger(SerializationTools.class.getName());
 
-    public HashMap<String, Long> getDeadList() {
-        return deserializeDeadList();
+    public HashMap<String, Long> getExpirationTimeList() {
+        return deserializeExpirationTimeList();
     }
 
     /**
-     * entering a new item to the DeadList
+     * entering a new item to the ExpirationTimeList
      * @param key
      * @param expirationTempMillis
      */
-    public void putToDeadList(String key, long expirationTempMillis){
+    public void putToExpirationTimeList(String key, long expirationTempMillis){
 
-        HashMap<String, Long> deadList = deserializeDeadList();
-        deadList.put(key, expirationTempMillis);
+        HashMap<String, Long> expirationTimeList = deserializeExpirationTimeList();
+        expirationTimeList.put(key, expirationTempMillis);
         if (LOG.isLoggable(Level.INFO)) {
-            LOG.log(Level.INFO, "DeadList size: " + deadList.size());
+            LOG.log(Level.INFO, "ExpirationTimeList size: " + expirationTimeList.size());
         }
-        serializeDeadList(deadList);
+        serializeExpirationTimeList(expirationTimeList);
     }
 
     /**
-     * serialize DeadList
-     * @param deadList
+     * serialize ExpirationTimeList
+     * @param expirationTimeList
      */
-    private void serializeDeadList(HashMap<String, Long> deadList){
+    private void serializeExpirationTimeList(HashMap<String, Long> expirationTimeList){
         Configuration configuration = new Configuration();
         try
         {
             FileOutputStream fos =
-                    new FileOutputStream(configuration.getRootPath() + "/" + configuration.getDeadList());
+                    new FileOutputStream(configuration.getRootPath() + "/" + configuration.getExpirationTimeList());
             ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(deadList);
+            oos.writeObject(expirationTimeList);
             oos.close();
             fos.close();
             if (LOG.isLoggable(Level.INFO)) {
-                LOG.log(Level.INFO, "DeadList has been serialized");
+                LOG.log(Level.INFO, "ExpirationTimeList has been serialized");
             }
         }catch(IOException ioe)
         {
@@ -54,45 +54,45 @@ public class SerializationTools {
     }
 
     /**
-     *deserialize DeadList
-     * @return deadList in format HashMap
+     *deserialize ExpirationTimeList
+     * @return expirationTimeList in format HashMap
      */
-    private HashMap<String,Long> deserializeDeadList() {
+    private HashMap<String,Long> deserializeExpirationTimeList() {
         Configuration configuration = new Configuration();
-        HashMap<String, Long> deadList = new HashMap<String, Long>();
+        HashMap<String, Long> expirationTimeList = new HashMap<String, Long>();
         try {
-            FileInputStream fis = new FileInputStream(configuration.getRootPath() + "/" + configuration.getDeadList());
+            FileInputStream fis = new FileInputStream(configuration.getRootPath() + "/" + configuration.getExpirationTimeList());
             ObjectInputStream ois = new ObjectInputStream(fis);
-            deadList = (HashMap) ois.readObject();
+            expirationTimeList = (HashMap) ois.readObject();
             ois.close();
             fis.close();
         } catch (IOException ioe) {
 //            ioe.printStackTrace();
-            return deadList;
+            return expirationTimeList;
         } catch (ClassNotFoundException e) {
 //            e.printStackTrace();
-            return deadList;
+            return expirationTimeList;
         }
         if (LOG.isLoggable(Level.INFO)) {
-            LOG.log(Level.INFO, "DeadList has been deserialized");
+            LOG.log(Level.INFO, "ExpirationTimeList has been deserialized");
         }
 
-        return deadList;
+        return expirationTimeList;
     }
 
     /**
      * Update dead List
-     * @param tempDeadList
+     * @param tempExpirationTimeList
      */
-    public void deadListUpdate(HashMap<String, Long> tempDeadList){
-        HashMap<String, Long> deadList = getDeadList();
+    public void expirationTimeListUpdate(HashMap<String, Long> tempExpirationTimeList){
+        HashMap<String, Long> expirationTimeList = getExpirationTimeList();
 
-        for (String key : tempDeadList.keySet()) {
-            if (deadList.containsKey(key)){
-                deadList.remove(key);
+        for (String key : tempExpirationTimeList.keySet()) {
+            if (expirationTimeList.containsKey(key)){
+                expirationTimeList.remove(key);
             }
         }
 
-        serializeDeadList(deadList);
+        serializeExpirationTimeList(expirationTimeList);
     }
 }

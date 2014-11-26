@@ -24,12 +24,14 @@ public class DeleteFileOperationTest {
     private FileStorageImpl service;
     private FileGenerator fileGenerator;
     private Deque<String> createdFiles;
+    private Deque<File> tempFiles;
 
     @Before
     public void initialize() throws IOException {
         service = new FileStorageImpl();
         fileGenerator = new FileGenerator();
         createdFiles = new ArrayDeque<String>();
+        tempFiles = new ArrayDeque<File>();
     }
 
     @After
@@ -37,12 +39,19 @@ public class DeleteFileOperationTest {
         while (!createdFiles.isEmpty()) {
             service.deleteFile(createdFiles.pop());
         }
+        while (!tempFiles.isEmpty()) {
+            tempFiles.pop().delete();
+        }
+        Configuration configuration = new Configuration();
+        File df = new File (configuration.getRootPath() + "/" + configuration.getExpirationTimeList());
+        df.delete();
     }
 
     @Test
     public void testDeleteFile() throws IOException, StorageException {
 
         File file = fileGenerator.createTempFile();
+        tempFiles.add(file);
         String fileName = file.getName();
 
         LOG.log(Level.INFO, "Temp file: " + fileName);
@@ -69,7 +78,7 @@ public class DeleteFileOperationTest {
         long purgeConst = 0;
 
         if (occupiedSpaceBeforePurge > 0){
-            purgeConst = occupiedSpaceBeforePurge/2;
+            purgeConst = (long)Math.ceil(occupiedSpaceBeforePurge/2);
         }
 
         service.purge(purgeConst);
@@ -84,6 +93,7 @@ public class DeleteFileOperationTest {
             File file = null;
             try {
                 file = fileGenerator.createTempFile();
+                tempFiles.add(file);
             } catch (IOException e) {
                 e.printStackTrace();
             }
